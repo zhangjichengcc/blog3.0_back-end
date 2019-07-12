@@ -40,3 +40,8 @@ app.post('/api/image/uploadImage', upload.array('img', 2), function (req, res) {
   res.end(JSON.stringify(result));
   // console.log(JSON.stringify(result))
 });
+
+app.listen(5002, ()=>{
+  console.log('server: image');
+  console.log('listen: http://127.0.0.1:5002');
+});

@@ -19,3 +19,8 @@ app.get('/api/artical/getArticalList', (req, res) => {
     })
 })
 
+app.listen(5001, ()=>{
+    console.log('server: artical');
+    console.log('listen: http://127.0.0.1:5001');
+});
+

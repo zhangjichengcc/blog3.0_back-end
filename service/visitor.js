@@ -33,3 +33,8 @@ app.get('/api/visitor/insertVisitor', (req, res) => {
         })
     })
 })
+
+app.listen(5003, ()=>{
+    console.log('server: visitor');
+    console.log('listen: http://127.0.0.1:5003');
+});
