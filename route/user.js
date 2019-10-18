@@ -5,7 +5,7 @@ const {
 } = require('../service/user.js');
 
 // 上传图片
-app.get('/api/user/login', (req, res) => { login(req, res) });
+app.post('/api/user/login', (req, res) => { login(req, res) });
 
 const userServer = app.listen(5003, () => {
   const host = userServer.address().address
