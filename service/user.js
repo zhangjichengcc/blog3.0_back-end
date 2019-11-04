@@ -1,5 +1,6 @@
 const BLOGDB = require('../database.js');
-const SHA2 = require("sha2");
+const SHA2 = require('sha2');
+const jwt = require('jsonwebtoken');
 
 
 // 登陆
@@ -20,7 +21,7 @@ const login = (req, res) => {
 				message: 'error username',
 			})
 		} else {
-			const sha2Pwd = SHA256(SHA256(response.password) + SHA256(response.name)).toString('hex');
+			const sha2Pwd = SHA256(SHA256(response.password)).toString('hex') + SHA256(username).toString('hex');
 			if (sha2Pwd === password) {
 				console.log('login: ', 'success');
 				res.json({
