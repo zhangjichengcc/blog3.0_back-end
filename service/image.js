@@ -1,9 +1,12 @@
 const app = require('../app.js');
 const multer = require("multer");
 const fs = require('fs');
-
+const config = require('../config');
+const {
+  target,
+  imgServer,
+} = config;
 // 设置图片存储地址
-const target = '/opt/imageServer/';
 const optMulter = multer({dest: target});
 app.use(optMulter.any());
 
@@ -14,13 +17,13 @@ const uploadImg = (file) => {
     let result = {};
     fs.rename(file.path, `${target}/${fileName}`, function (err) {
       if(err) {
-        result.code = 1;
+        result.code = -1;
         result.errMsg = err;
         reject(result);
       }else{
         result.code = 0;
         result.errMsg = '上传成功';
-        result.data = `http://118.190.52.53/images/${fileName}`;
+        result.data = `${imgServer}/${fileName}`;
         resolve(result);
       }
     })
@@ -28,7 +31,7 @@ const uploadImg = (file) => {
 }
 
 // 上传图片方法
-const uploadImage = (req, res) => {
+const uploadImage = (req, res, next) => {
   const { files = [] } = req;
   const file = files[0];
   uploadImg(file).then(result => {
