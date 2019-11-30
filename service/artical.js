@@ -31,14 +31,33 @@ const selectArticalList = (req, res) => {
 
 // 插入文章
 const insertArtical = (req, res) => {
-	const { title = null, introduction = '文章简介', banner = null, mainContent = null, createTime = null, readCount = 0 } = req.body;
+	const { title = null, introduction = '文章简介', banner = null, mainContent = null, createTime =  new Date(), readCount = 0 } = req.body;
 	const sqlStr = `INSERT INTO artical (title, introduction, banner, main_content, create_time, read_count) VALUES (?, ?, ?, ?, ?, ?);`
 	BLOGDB.query(sqlStr, [title, introduction, banner, mainContent, createTime, readCount], (err, results) => {
 		console.log('errormsg: ', err, 'results:', results);
 		if(err) return res.json({code: -1, message: '获取失败'});
+		const resData = {id: results.insertId};
 		res.json({
 			code: 0,
 			message: 'success',
+			data: resData,
+		})
+	})
+}
+
+// 更新文章
+const updateArtical = (req, res) => {
+	const { id, title = null, introduction = '文章简介', banner = null, mainContent = null, createTime = new Date() } = req.body;
+	// const sqlStr = `UPDATE artical SET title=${title}, banner=${banner}, create_time=${createTime}, introduction=${introduction}, main_content=${mainContent} WHERE id=${id};`
+	const sqlStr = `UPDATE artical SET title=?, banner=?, create_time=?, introduction=?, main_content=? WHERE id=?;`
+	BLOGDB.query(sqlStr, [title, banner, createTime, introduction,mainContent, id], (err, results) => {
+		console.log('errormsg: ', err, 'results:', results);
+		if(err) return res.json({code: -1, message: '更新失败'});
+		const resData = {id};
+		res.json({
+			code: 0,
+			message: 'success',
+			data: resData,
 		})
 	})
 }
@@ -59,9 +78,26 @@ const selectArtical = (req, res) => {
 	})
 }
 
+// 根据id删除文章
+const deleteArtical = (req, res) => {
+	const { id } = req.query;
+	const sqlStr = `DELETE FROM artical WHERE id = ${id}`;
+	BLOGDB.query(sqlStr, (err, results) => {
+		console.log('errormsg: ', err, 'results:', results);
+		if(err) return res.json({code: -1, message: '操作失败'});
+		res.json({
+			code: 0,
+			message: 'success',
+			data: '操作成功',
+		})
+	})
+}
+
 module.exports = {
 	selectArticalList,
 	insertArtical,
+	updateArtical,
 	selectArtical,
+	deleteArtical,
 }
 
