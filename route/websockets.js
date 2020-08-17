@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-08-17 10:10:32
+ * @LastEditTime: 2020-08-17 18:11:29
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \node\route\websockets.js
+ */
 const WebSocket = require('ws');
 // const wss = new WebSocket.Server(
 //   {
@@ -58,13 +66,36 @@ const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({ port: 5000 });
 wss.on('connection', function connection(ws) {
-    ws.on('message', function incoming(message) {
+    ws.send(JSON.stringify({
+      type: 'text',
+      message: '链接已建立，开始通话',
+      time: new Date().getTime(),
+      messageId: new Date().getTime(),
+      sourceId: 'node',
+    }))
+    ws.on('message', function incoming(params) {
+      const {
+        message = '',
+        type = '',
+        userId = '',
+      } = JSON.parse(params) || {};
+      const receive = {
+        type,
+        message,
+        sourceId: userId,
+        messageId: new Date().getTime(),
+        time: new Date().getTime(),
+      }
+      const reply = {
+        type,
+        message: `回复 ${message}`,
+        sourceId: 'node',
+        messageId: new Date().getTime(),
+        time: new Date().getTime(),
+      }
+      ws.send(JSON.stringify(receive));
       setTimeout(() => {
-        ws.send(`消息内容：${message}`);
-      })
-    // console.log('received: %s', message);
+        ws.send(JSON.stringify(reply));
+      }, 2000)
     });
-    setInterval(() => {
-      ws.send('something');
-    }, 2000)
 });
