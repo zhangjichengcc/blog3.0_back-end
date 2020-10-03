@@ -1,8 +1,8 @@
 /*
  * @Author: zhang jicheng
  * @Date: 2019-08-15 16:57:18
- * @LastEditTime : 2020-01-04 14:40:23
- * @LastEditors  : Please set LastEditors
+ * @LastEditTime: 2020-10-02 17:02:00
+ * @LastEditors: zhangjicheng
  * @Description: In User Settings Edit
  * @FilePath: \node\service\artical.js
  */
@@ -10,19 +10,46 @@ const BLOGDB = require('../database.js');
 
 // 查询文章列表
 const selectArticalList = (req, res) => {
-	const { pageNum = 1, pageSize = 10 } = req.query;
+	const { pageNum = 1, pageSize = 10, name = '', tag = '' } = req.query;
 	// 定义SQL语句
-	// const sqlStr = `SELECT a.id, a.title, a.introduction, a.banner, a.create_time createTime, a.read_count readCount, a.like_count likeCount, msgCount, type FROM artical a LEFT JOIN ( SELECT count(*) msgCount, m.artical_id FROM artical_message m GROUP BY artical_id ) t ON a.id = t.artical_id LEFT JOIN ( SELECT ty.name type, ty.artical_id FROM artical_type ty ) t2 ON a.id = t2.artical_id LIMIT ${(pageNum - 1) * pageSize}, ${pageNum * pageSize}; SELECT count(*) total FROM artical;`;
-	const sqlStr = `SELECT a.id, a.title, a.publish, a.introduction, a.banner, DATE_FORMAT(a.create_time,"%Y-%m-%d %H:%i:%s") createTime, a.read_count readCount, a.like_count likeCount, msgCount, type \
-	FROM artical a \
-	LEFT JOIN ( SELECT count(*) msgCount, m.artical_id FROM artical_message m GROUP BY artical_id ) t \
-	ON a.id = t.artical_id \
-	LEFT JOIN ( SELECT ty.name type, ty.artical_id FROM artical_type ty ) t2 \
-	ON a.id = t2.artical_id \
-	ORDER BY create_time DESC \
-	LIMIT ${pageNum - 1}, ${pageSize}; \
-	SELECT count(*) total FROM artical; \
-	`
+	const sqlStr = `
+	SELECT
+		tbl_art.id,
+		tbl_art.title,
+		tbl_art.publish,
+		tbl_art.introduction,
+		tbl_art.banner,
+		DATE_FORMAT( tbl_art.create_time, "%Y-%m-%d %H:%i:%s" ) createTime,
+		tbl_art.read_count readCount,
+		tbl_art.like_count likeCount,
+		msgCount,
+		tag 
+	FROM
+		artical tbl_art
+		LEFT JOIN ( SELECT count( * ) msgCount, m.artical_id FROM artical_message m GROUP BY artical_id ) t ON tbl_art.id = t.artical_id
+		LEFT JOIN ( SELECT tbl_tag.name tag, tbl_tag.artical_id FROM artical_tags tbl_tag ) t2 ON tbl_art.id = t2.artical_id 
+	WHERE
+	 	(tbl_art.title LIKE UPPER( '%${name}%' ) OR tbl_art.title LIKE LOWER( '%${name}%' ))
+		${tag ? `
+		AND t2.tag = ${tag} 
+	 	AND t2.tag IS NOT NULL
+		` : ''} 
+	ORDER BY
+		create_time DESC
+		LIMIT ${pageNum - 1}, ${pageSize};
+	
+	SELECT
+		count(*) total
+	FROM 
+		artical tbl_art
+		LEFT JOIN artical_tags tbl_tag ON tbl_art.id = tbl_tag.artical_id 
+	WHERE 
+		title LIKE UPPER('%${name}%') OR title LIKE LOWER('%${name}%')
+		${tag ? `
+		AND t2.tag = ${tag} 
+	 	AND t2.tag IS NOT NULL
+		` : ''} 
+`
 	BLOGDB.query(sqlStr, (err, results) => {
 		console.log('errormsg: ', err, 'results:', results);
 		if(err) return res.json({code: -1, message: '获取失败'})
